@@ -6,12 +6,12 @@
 
 	$c= new conectar();
 	$conexao=$c->conexao();
-	$idvenda=$_GET['idvenda'];
+	$codigovenda=$_GET['codigovenda'];
 
-    // Consulta inicial para pegar dados do cabeçalho
-    $sql="SELECT ve.id_venda, ve.dataCompra, ve.id_cliente
+    $sql="SELECT ve.codigo_venda, ve.dataCompra, ve.id_cliente
 	        from vendas as ve 
-	        where ve.id_venda='$idvenda'";
+	        where ve.codigo_venda='$codigovenda'
+	        LIMIT 1";
 
     $result=mysqli_query($conexao,$sql);
 	$ver=mysqli_fetch_row($result);
@@ -39,7 +39,7 @@
 
  		<table class="table">
  			<tr>
- 				<td>Produto: </td>
+ 				<td>Produto</td>
  				<td>Preço Unit.</td>
  				<td>Quantidade</td>
  				<td>Descrição</td>
@@ -47,7 +47,6 @@
  			</tr>
 
  			<?php 
- 			// Consulta ajustada para pegar os dados corretos da tabela vendas e produtos
  			$sql="SELECT pro.nome,
 				        ve.preco,
 				        pro.descricao,
@@ -56,7 +55,7 @@
 					from vendas as ve 
 					inner join produtos as pro
 					on ve.id_produto=pro.id_produto
-					and ve.id_venda='$idvenda'";
+					where ve.codigo_venda='$codigovenda'";
 
 			$result=mysqli_query($conexao,$sql);
 			$total=0;
@@ -71,7 +70,6 @@
 				<td><?php echo "R$ " . number_format($mostrar[4], 2, ',', '.'); ?></td>
 			</tr>
 			<?php 
-				// Soma o total acumulando o total_venda de cada item
 				$total = $total + $mostrar[4];
 			endwhile;
 			?>

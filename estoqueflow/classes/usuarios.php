@@ -12,10 +12,8 @@ class usuarios{
 		return mysqli_query($conexao, $sql);
 	}
 
-
-
 	public function login($dados){
-			$c = new conectar();
+		$c = new conectar();
 		$conexao=$c->conexao();
 
 		$senha = sha1($dados[1]);
@@ -27,17 +25,12 @@ class usuarios{
 
 		$result = mysqli_query($conexao, $sql);
 
-		//echo $sql;
-
 		if(mysqli_num_rows($result) > 0){
 			return 1;
 		}else{
 			return 0;
 		}
-
-
 	}
-
 
 	public function trazerId($dados){
 		$c = new conectar();
@@ -51,54 +44,61 @@ class usuarios{
 	}
 
 	public function obterDados($idusuario){
+		$c = new conectar();
+		$conexao=$c->conexao();
 
-			$c = new conectar();
-			$conexao=$c->conexao();
+		$sql="SELECT id,
+						nome,
+						user,
+						email
+				from usuarios 
+				where id='$idusuario'";
+		$result=mysqli_query($conexao,$sql);
 
-			$sql="SELECT id,
-							nome,
-							user,
-							email
-					from usuarios 
-					where id='$idusuario'";
-			$result=mysqli_query($conexao,$sql);
+		$mostrar=mysqli_fetch_row($result);
 
-			$mostrar=mysqli_fetch_row($result);
+		$dados=array(
+					'id' => $mostrar[0],
+						'nome' => $mostrar[1],
+						'user' => $mostrar[2],
+						'email' => $mostrar[3]
+					);
 
-			
-
-			$dados=array(
-						'id' => $mostrar[0],
-							'nome' => $mostrar[1],
-							'user' => $mostrar[2],
-							'email' => $mostrar[3]
-						);
-
-			return $dados;
-		}
-
-		public function atualizar($dados){
-			$c = new conectar();
-			$conexao=$c->conexao();
-
-			$sql="UPDATE usuarios set nome='$dados[1]',
-									user='$dados[2]',
-									email='$dados[3]'
-						where id='$dados[0]'";
-
-					
-
-			return mysqli_query($conexao,$sql);	
-		}
-
-		public function excluir($idusuario){
-			$c = new conectar();
-			$conexao=$c->conexao();
-
-			$sql="DELETE from usuarios 
-					where id='$idusuario'";
-			return mysqli_query($conexao,$sql);
-		}
+		return $dados;
 	}
+
+	public function atualizar($dados){
+		$c = new conectar();
+		$conexao=$c->conexao();
+
+		$sql="UPDATE usuarios set nome='$dados[1]',
+								user='$dados[2]',
+								email='$dados[3]'
+					where id='$dados[0]'";
+
+		return mysqli_query($conexao,$sql);	
+	}
+
+	public function excluir($idusuario){
+		$c = new conectar();
+		$conexao=$c->conexao();
+
+		$sql="DELETE from usuarios 
+				where id='$idusuario'";
+		return mysqli_query($conexao,$sql);
+	}
+
+	public function redefinirSenha($idusuario, $novaSenha){
+		$c = new conectar();
+		$conexao=$c->conexao();
+
+		$senhaHash = sha1($novaSenha);
+
+		$sql="UPDATE usuarios set senha='$senhaHash'
+					where id='$idusuario'";
+
+		return mysqli_query($conexao,$sql);
+	}
+}
 
  ?>

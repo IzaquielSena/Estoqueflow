@@ -1,16 +1,15 @@
 <?php
-ob_start(); // Previne que avisos do PHP quebrem o PDF
+ob_start();
 
 require_once '../../lib/dompdf/autoload.inc.php';
 use Dompdf\Dompdf;
 
-$id = isset($_GET['idvenda']) ? $_GET['idvenda'] : null;
+$codigovenda = isset($_GET['codigovenda']) ? $_GET['codigovenda'] : null;
 
-if (!$id) {
-    die("ID da venda não fornecido.");
+if (!$codigovenda) {
+    die("Código da venda não fornecido.");
 }
 
-// Função cURL para capturar o relatório
 function buscar_relatorio($url) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -20,7 +19,7 @@ function buscar_relatorio($url) {
     return $dados;
 }
 
-$url = "http://localhost/estoqueflow/view/vendas/relatorioVendaPdf.php?idvenda=" . $id;
+$url = "http://localhost/estoqueflow/view/vendas/relatorioVendaPdf.php?codigovenda=" . $codigovenda;
 $html = buscar_relatorio($url);
 
 if (!$html) {
@@ -29,12 +28,10 @@ if (!$html) {
 }
 
 $pdf = new Dompdf();
-// Papel tamanho carta na vertical
 $pdf->setPaper("letter", "portrait"); 
 $pdf->loadHtml($html);
 $pdf->render();
 
-ob_end_clean(); // Limpa saídas acidentais
+ob_end_clean();
 
-// Abre em nova aba para visualização
 $pdf->stream('relatorio_venda.pdf', array("Attachment" => false));

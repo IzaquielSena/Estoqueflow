@@ -44,7 +44,7 @@ $result = $obj->relatorioVendasPorData($dataInicio, $dataFim);
                     $totalGeral += $totalVenda;
                 ?>
                 <tr>
-                    <td><?php echo $ver[0] ?></td>
+                    <td>#<?php echo $ver[0] ?></td>
                     <td><?php echo date("d/m/Y", strtotime($ver[1])) ?></td>
                     <td><?php echo $obj->nomeCliente($ver[2]) ?></td>
                     <td><?php echo "R$ ".number_format($totalVenda, 2, ',', '.') ?></td>

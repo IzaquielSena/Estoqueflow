@@ -6,10 +6,11 @@
 
 	$obj= new vendas();
 
-	$sql="SELECT id_venda,
+	$sql="SELECT codigo_venda,
 				dataCompra,
 				id_cliente 
-			from vendas group by id_venda";
+			from vendas group by codigo_venda
+			ORDER BY codigo_venda DESC";
 	$result=mysqli_query($conexao,$sql); 
 ?>
 
@@ -23,6 +24,7 @@
 						<th>Data</th>
 						<th>Cliente</th>
 						<th>Total da Compra</th>
+						<th>Lucro</th>
 						<th>Ações</th>
 					</tr>
 				</thead>
@@ -47,10 +49,17 @@
 							?>
 						</td>
 						<td>
-							<a href="../procedimentos/vendas/criarRelatorioPdf.php?idvenda=<?php echo $ver[0] ?>" 
+							<?php 
+								$lucro = $obj->obterLucro($ver[0]);
+								$corLucro = $lucro >= 0 ? 'var(--success, #16a34a)' : 'var(--danger, #dc2626)';
+								echo "<strong style='color: $corLucro;'>R$ " . number_format($lucro, 2, ',', '.') . "</strong>"; 
+							?>
+						</td>
+						<td>
+							<a href="../procedimentos/vendas/criarRelatorioPdf.php?codigovenda=<?php echo $ver[0] ?>" 
 							   target="_blank" 
 							   class="btn-modern btn-primary-modern btn-sm-modern">
-								<span class="glyphicon glyphicon-file"></span> Comprovate
+								<span class="glyphicon glyphicon-file"></span> Comprovante
 							</a>
 						</td>
 					</tr>

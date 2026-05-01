@@ -6,18 +6,17 @@
 
 	$obj = new entradas_estoque();
 
-	// Validar dados recebidos
-	if(!isset($_POST['produtoSelect']) || !isset($_POST['quantidade']) || !isset($_POST['preco']) || !isset($_POST['dataEntrada'])){
+	if(!isset($_POST['produtoSelect']) || !isset($_POST['quantidade']) || !isset($_POST['preco']) || !isset($_POST['dataEntrada']) || !isset($_POST['precoVenda'])){
 		echo 0;
 		exit;
 	}
 
 	$idProduto = $_POST['produtoSelect'];
 	$quantidade = $_POST['quantidade'];
-	$preco = str_replace(",", ".", $_POST['preco']); // Converter vírgula para ponto
+	$preco = str_replace(",", ".", $_POST['preco']);
+	$precoVenda = str_replace(",", ".", $_POST['precoVenda']);
 	$dataEntrada = $_POST['dataEntrada'];
 
-	// Validar se o produto existe
 	$c = new conectar();
 	$conexao = $c->conexao();
 	$sql = "SELECT id_produto FROM produtos WHERE id_produto = '$idProduto'";
@@ -33,7 +32,8 @@
 		$iduser,
 		$quantidade,
 		$preco,
-		$dataEntrada
+		$dataEntrada,
+		$precoVenda
 	);
 
 	echo $obj->inserirEntrada($dados);

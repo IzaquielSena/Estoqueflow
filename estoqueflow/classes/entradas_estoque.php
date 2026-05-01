@@ -10,11 +10,14 @@
 			// $dados[0] = id_produto
 			// $dados[1] = id_usuario
 			// $dados[2] = quantidade
-			// $dados[3] = preco
+			// $dados[3] = preco (custo)
 			// $dados[4] = data_entrada
+			// $dados[5] = preco_venda
 
-			$sql="INSERT into entradas_estoque (id_produto, id_usuario, quantidade, preco, data_entrada, dataCaptura) 
-				  values ('$dados[0]', '$dados[1]', '$dados[2]', '$dados[3]', '$dados[4]', '$data')";
+			$preco_venda = isset($dados[5]) ? $dados[5] : 0;
+
+			$sql="INSERT into entradas_estoque (id_produto, id_usuario, quantidade, preco, preco_venda, data_entrada, dataCaptura) 
+				  values ('$dados[0]', '$dados[1]', '$dados[2]', '$dados[3]', '$preco_venda', '$dados[4]', '$data')";
 			
 			return mysqli_query($conexao,$sql);
 		}
@@ -28,6 +31,7 @@
 						id_produto, 
 						quantidade,
 						preco,
+						preco_venda,
 						data_entrada,
 						dataCaptura
 				from entradas_estoque 
@@ -46,6 +50,7 @@
 						id_produto, 
 						quantidade,
 						preco,
+						preco_venda,
 						data_entrada
 				from entradas_estoque 
 				where id_entrada='$idEntrada'";
@@ -58,7 +63,8 @@
 					"id_produto" => $mostrar[1],
 					"quantidade" => $mostrar[2],
 					"preco" => $mostrar[3],
-					"data_entrada" => $mostrar[4]
+					"preco_venda" => $mostrar[4],
+					"data_entrada" => $mostrar[5]
 						);
 
 			return $dados;
@@ -71,11 +77,15 @@
 
 			// $dados[0] = id_entrada
 			// $dados[1] = quantidade
-			// $dados[2] = preco
+			// $dados[2] = preco (custo)
 			// $dados[3] = data_entrada
+			// $dados[4] = preco_venda
+
+			$preco_venda = isset($dados[4]) ? $dados[4] : 0;
 
 			$sql="UPDATE entradas_estoque set quantidade='$dados[1]', 
 										preco='$dados[2]',
+										preco_venda='$preco_venda',
 										data_entrada='$dados[3]'
 						where id_entrada='$dados[0]'";
 
@@ -108,7 +118,7 @@
 			return $row['total'];
 		}
 
-		// Obter preço atual (última entrada)
+		// Obter preço de custo atual (última entrada)
 		public function obterPrecoAtual($idProduto){
 			$c= new conectar();
 			$conexao=$c->conexao();
@@ -125,6 +135,23 @@
 			return $row ? $row['preco'] : 0;
 		}
 
+		// Obter preço de venda atual (última entrada)
+		public function obterPrecoVendaAtual($idProduto){
+			$c= new conectar();
+			$conexao=$c->conexao();
+
+			$sql="SELECT preco_venda
+					from entradas_estoque 
+					where id_produto='$idProduto' AND preco_venda > 0
+					ORDER BY data_entrada DESC
+					LIMIT 1";
+			
+			$result=mysqli_query($conexao,$sql);
+			$row=mysqli_fetch_assoc($result);
+
+			return $row ? $row['preco_venda'] : 0;
+		}
+
 		// Listar todas as entradas de estoque com informações do produto
 		public function listarTodasEntradas(){
 			$c= new conectar();
@@ -135,10 +162,12 @@
 						p.nome,
 						e.quantidade,
 						e.preco,
+						e.preco_venda,
 						e.data_entrada,
 						e.dataCaptura
 					from entradas_estoque e
 					INNER JOIN produtos p ON e.id_produto = p.id_produto
+					WHERE e.quantidade > 0
 					ORDER BY e.data_entrada DESC";
 			
 			return mysqli_query($conexao,$sql);

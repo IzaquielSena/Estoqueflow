@@ -54,11 +54,12 @@ require_once "../../classes/conexao.php";
 					</div>
 					<div class="col-sm-6">
 						<div class="form-group-modern">
-							<label class="form-label-modern">Preço</label>
+							<label class="form-label-modern">Preço de Venda</label>
 							<input readonly="" type="text" class="form-control-modern" id="precoV" name="precoV">
 						</div>
 					</div>
 				</div>
+				<input type="hidden" id="precoCustoV" name="precoCustoV" value="0">
 				<div class="form-group-modern">
 					<label class="form-label-modern">Quantidade Vendida</label>
 					<input type="text" class="form-control-modern" id="quantV" name="quantV" placeholder="Informe a quantidade">
@@ -100,8 +101,8 @@ require_once "../../classes/conexao.php";
 
 					$('#quantidadeV').val(dado['quantidade']);
 					$('#precoV').val(dado['preco']);
+					$('#precoCustoV').val(dado['preco_custo']);
 					
-					// Limpa a imagem anterior e adiciona a nova com tamanho maior
 					$('#imgProduto').empty();
 					$('#imgProduto').prepend('<img class="img-thumbnail" id="imgp" src="' + dado['url'] + '" style="width: 200px; height: 200px; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />');
 					
@@ -117,8 +118,6 @@ require_once "../../classes/conexao.php";
 
 			quant = $('#quantV').val();
 			quantidade = $('#quantidadeV').val();
-
-
 
 			if(parseInt(quant) > parseInt(quantidade)){
 				alertify.alert("Quantidade inexistente em estoque!!");
@@ -194,8 +193,8 @@ require_once "../../classes/conexao.php";
 				if(r > 0){
 					$('#tabelaVendasTempLoad').load("vendas/tabelaVendasTemp.php");
 					$('#frmVendasProdutos')[0].reset();
-					$('#imgProduto').empty(); // Limpa a imagem após a venda
-					alertify.alert("Venda Criada com Sucesso!");
+					$('#imgProduto').empty();
+					alertify.alert("Venda #" + r + " Criada com Sucesso!");
 				}else if(r==0){
 					alertify.alert("Não possui lista de Vendas");
 				}else{

@@ -1,6 +1,7 @@
 <?php 
 	session_start();
 	require_once "../../classes/conexao.php";
+	require_once "../../classes/vendas.php";
 	$c= new conectar();
 	$conexao=$c->conexao();
 
@@ -10,8 +11,7 @@
 	$quantidade=$_POST['quantidadeV'];
 	$quantV=$_POST['quantV'];
 	$preco=$_POST['precoV'];
-
-
+	$precoCusto=isset($_POST['precoCustoV']) ? $_POST['precoCustoV'] : 0;
 
 	$sql="SELECT nome,sobrenome 
 			from clientes 
@@ -37,7 +37,8 @@
 				$quantidade."||".
 				$quantV."||".
 				$quantV * $preco."||".
-				$idcliente;
+				$idcliente."||".
+				$precoCusto;
 
 	$_SESSION['tabelaComprasTemp'][]=$produto;
 

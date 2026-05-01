@@ -102,6 +102,41 @@ if(isset($_SESSION['usuario'])){
 	</div>
 </div>
 
+<!-- Modal Redefinir Senha -->
+<div class="modal fade" id="redefinirSenhaModal" tabindex="-1" role="dialog" aria-labelledby="redefinirSenhaLabel">
+	<div class="modal-dialog modal-sm" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="redefinirSenhaLabel"><span class="glyphicon glyphicon-lock"></span> Redefinir Senha</h4>
+			</div>
+			<div class="modal-body">
+				<form id="frmRedefinirSenha">
+					<input type="hidden" id="idUsuarioSenha" name="idUsuarioSenha">
+					<div class="form-group-modern">
+						<label>Usuário</label>
+						<input type="text" class="form-control-modern" id="nomeUsuarioSenha" disabled>
+					</div>
+					<div class="form-group-modern">
+						<label>Nova Senha <span class="required">*</span></label>
+						<input type="password" class="form-control-modern" name="novaSenha" id="novaSenha" placeholder="Digite a nova senha">
+					</div>
+					<div class="form-group-modern">
+						<label>Confirmar Senha <span class="required">*</span></label>
+						<input type="password" class="form-control-modern" name="confirmarSenha" id="confirmarSenha" placeholder="Confirme a nova senha">
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn-modern btn-outline-modern" data-dismiss="modal">Cancelar</button>
+				<button id="btnRedefinirSenha" type="button" class="btn-modern btn-primary-modern">
+					<span class="glyphicon glyphicon-lock"></span> Redefinir Senha
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
 </body>
 </html>
 
@@ -119,6 +154,13 @@ if(isset($_SESSION['usuario'])){
 				$('#emailU').val(dado['email']);
 			}
 		});
+	}
+
+	function prepararRedefinirSenha(idusuario, nome){
+		$('#idUsuarioSenha').val(idusuario);
+		$('#nomeUsuarioSenha').val(nome);
+		$('#novaSenha').val('');
+		$('#confirmarSenha').val('');
 	}
 
 	function eliminarUsuario(idusuario){
@@ -156,6 +198,46 @@ if(isset($_SESSION['usuario'])){
 						alertify.success("Usuário editado com sucesso!");
 					}else{
 						alertify.error("Não foi possível editar");
+					}
+				}
+			});
+		});
+
+		$('#btnRedefinirSenha').click(function(){
+			var novaSenha = $('#novaSenha').val();
+			var confirmarSenha = $('#confirmarSenha').val();
+
+			if(novaSenha == '' || confirmarSenha == ''){
+				alertify.alert("Preencha todos os campos!");
+				return false;
+			}
+
+			if(novaSenha != confirmarSenha){
+				alertify.alert("As senhas não coincidem!");
+				return false;
+			}
+
+			if(novaSenha.length < 4){
+				alertify.alert("A senha deve ter pelo menos 4 caracteres!");
+				return false;
+			}
+
+			datos=$('#frmRedefinirSenha').serialize();
+			$.ajax({
+				type:"POST",
+				data:datos,
+				url:"../procedimentos/usuarios/redefinirSenha.php",
+				success:function(r){
+					if(r==1){
+						$('#redefinirSenhaModal').modal('hide');
+						$('#frmRedefinirSenha')[0].reset();
+						alertify.success("Senha redefinida com sucesso!");
+					}else if(r==2){
+						alertify.error("As senhas não coincidem!");
+					}else if(r==3){
+						alertify.error("A senha deve ter pelo menos 4 caracteres!");
+					}else{
+						alertify.error("Falha ao redefinir senha");
 					}
 				}
 			});

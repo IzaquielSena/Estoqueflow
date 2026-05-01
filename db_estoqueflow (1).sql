@@ -63,6 +63,7 @@ CREATE TABLE `entradas_estoque` (
   `id_usuario` int(11) NOT NULL,
   `quantidade` int(11) NOT NULL,
   `preco` decimal(10,2) NOT NULL,
+  `preco_venda` decimal(10,2) NOT NULL DEFAULT 0.00,
   `data_entrada` date NOT NULL,
   `dataCaptura` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -144,10 +145,12 @@ INSERT INTO `usuarios` (`id`, `nome`, `user`, `email`, `senha`, `dataCaptura`) V
 
 CREATE TABLE `vendas` (
   `id_venda` int(11) NOT NULL,
+  `codigo_venda` int(11) NOT NULL DEFAULT 0,
   `id_cliente` int(11) NOT NULL,
   `id_produto` int(11) NOT NULL,
   `id_usuario` int(11) NOT NULL,
   `preco` decimal(10,2) DEFAULT NULL,
+  `preco_custo` decimal(10,2) DEFAULT NULL,
   `quantidade` int(11) NOT NULL,
   `total_venda` decimal(10,2) DEFAULT NULL,
   `dataCompra` date NOT NULL

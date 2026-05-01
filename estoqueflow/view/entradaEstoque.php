@@ -20,7 +20,7 @@ if(isset($_SESSION['usuario'])){
 <div class="content-area fade-in">
 	<div class="page-header">
 		<h1>Entrada de Estoque</h1>
-		<p>Registre a entrada de produtos, informando quantidade, preço e data.</p>
+		<p>Registre a entrada de produtos, informando quantidade, preço de custo e preço de venda.</p>
 	</div>
 
 	<div class="row">
@@ -47,12 +47,27 @@ if(isset($_SESSION['usuario'])){
 						</div>
 
 						<div class="form-group-modern">
-							<label>Preço Unitário <span class="required">*</span></label>
+							<label>Preço de Custo (Compra) <span class="required">*</span></label>
 							<div class="input-group">
 								<span class="input-group-addon">R$</span>
 								<input type="text" class="form-control-modern" id="preco" name="preco" placeholder="0,00" required>
 							</div>
-							<small style="color: var(--text-muted); font-size: 0.8rem;">Use vírgula para decimais (ex: 10,50)</small>
+							<small style="color: var(--text-muted); font-size: 0.8rem;">Preço que você pagou pelo produto</small>
+						</div>
+
+						<div class="form-group-modern">
+							<label>Preço de Venda <span class="required">*</span></label>
+							<div class="input-group">
+								<span class="input-group-addon">R$</span>
+								<input type="text" class="form-control-modern" id="precoVenda" name="precoVenda" placeholder="0,00" required>
+							</div>
+							<small style="color: var(--text-muted); font-size: 0.8rem;">Preço que será cobrado na venda</small>
+						</div>
+
+						<div id="lucroPreview" style="display:none; padding: 10px; background: var(--success-light, #d1fae5); border-radius: 8px; margin-bottom: 12px;">
+							<strong style="color: var(--success, #059669);">Lucro por unidade: <span id="lucroValor">R$ 0,00</span></strong>
+							<br>
+							<small style="color: var(--success, #059669);">Margem: <span id="margemValor">0%</span></small>
 						</div>
 
 						<div class="form-group-modern">
@@ -108,10 +123,17 @@ if(isset($_SESSION['usuario'])){
 						<input type="number" class="form-control-modern" id="quantidadeU" name="quantidadeU" min="1">
 					</div>
 					<div class="form-group-modern">
-						<label>Preço Unitário</label>
+						<label>Preço de Custo</label>
 						<div class="input-group">
 							<span class="input-group-addon">R$</span>
 							<input type="text" class="form-control-modern" id="precoU" name="precoU">
+						</div>
+					</div>
+					<div class="form-group-modern">
+						<label>Preço de Venda</label>
+						<div class="input-group">
+							<span class="input-group-addon">R$</span>
+							<input type="text" class="form-control-modern" id="precoVendaU" name="precoVendaU">
 						</div>
 					</div>
 					<div class="form-group-modern">
@@ -144,6 +166,31 @@ if(isset($_SESSION['usuario'])){
 		});
 	});
 
+	function calcularLucro(){
+		var precoCusto = parseFloat($('#preco').val().replace(',', '.')) || 0;
+		var precoVenda = parseFloat($('#precoVenda').val().replace(',', '.')) || 0;
+		
+		if(precoCusto > 0 && precoVenda > 0){
+			var lucro = precoVenda - precoCusto;
+			var margem = ((lucro / precoCusto) * 100).toFixed(1);
+			$('#lucroValor').text('R$ ' + lucro.toFixed(2).replace('.', ','));
+			$('#margemValor').text(margem + '%');
+			$('#lucroPreview').show();
+
+			if(lucro < 0){
+				$('#lucroPreview').css('background', 'var(--danger-light, #fee2e2)');
+				$('#lucroPreview strong, #lucroPreview small').css('color', 'var(--danger, #dc2626)');
+			} else {
+				$('#lucroPreview').css('background', 'var(--success-light, #d1fae5)');
+				$('#lucroPreview strong, #lucroPreview small').css('color', 'var(--success, #059669)');
+			}
+		} else {
+			$('#lucroPreview').hide();
+		}
+	}
+
+	$('#preco, #precoVenda').on('input', calcularLucro);
+
 	function addDadosEntrada(identrada){
 		$.ajax({
 			type:"POST",
@@ -154,6 +201,7 @@ if(isset($_SESSION['usuario'])){
 				$('#idEntrada').val(dado['id_entrada']);
 				$('#quantidadeU').val(dado['quantidade']);
 				$('#precoU').val(dado['preco']);
+				$('#precoVendaU').val(dado['preco_venda']);
 				$('#dataEntradaU').val(dado['data_entrada']);
 			}
 		});
@@ -216,6 +264,7 @@ if(isset($_SESSION['usuario'])){
 					if(r == 1){
 						$('#frmEntradaEstoque')[0].reset();
 						document.getElementById('dataEntrada').valueAsDate = new Date();
+						$('#lucroPreview').hide();
 						$('#tabelaProdutosLoad').load("entradas_estoque/tabelaEntradasEstoque.php");
 						alertify.success("Entrada registrada com sucesso!");
 					}else{

@@ -1,16 +1,15 @@
 <?php
-ob_start(); // Previne que erros de texto corrompam o PDF
+ob_start();
 
 require_once '../../lib/dompdf/autoload.inc.php';
 use Dompdf\Dompdf;
 
-$id = isset($_GET['idvenda']) ? $_GET['idvenda'] : null;
+$codigovenda = isset($_GET['codigovenda']) ? $_GET['codigovenda'] : null;
 
-if (!$id) {
-    die("ID da venda não fornecido.");
+if (!$codigovenda) {
+    die("Código da venda não fornecido.");
 }
 
-// Função para buscar o HTML via cURL (mais estável em localhost)
 function buscar_conteudo($url) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -20,7 +19,7 @@ function buscar_conteudo($url) {
     return $dados;
 }
 
-$url = "http://localhost/estoqueflow/view/vendas/comprovanteVendaPdf.php?idvenda=" . $id;
+$url = "http://localhost/estoqueflow/view/vendas/comprovanteVendaPdf.php?codigovenda=" . $codigovenda;
 $html = buscar_conteudo($url);
 
 if (!$html) {
@@ -29,12 +28,10 @@ if (!$html) {
 }
 
 $pdf = new Dompdf();
-// Papel personalizado para comprovante pequeno
 $pdf->setPaper(array(0, 0, 125, 250)); 
 $pdf->loadHtml($html);
 $pdf->render();
 
-ob_end_clean(); // Limpa o buffer antes de enviar o arquivo
+ob_end_clean();
 
-// "Attachment" => false faz abrir no navegador/Adobe em vez de baixar
 $pdf->stream('comprovante_venda.pdf', array("Attachment" => false));
