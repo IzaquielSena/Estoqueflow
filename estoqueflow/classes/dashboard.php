@@ -26,7 +26,7 @@ class dashboard {
         $conexao = $c->conexao();
         $mes = date('m');
         $ano = date('Y');
-        $sql = "SELECT COUNT(DISTINCT id_venda) as total FROM vendas WHERE MONTH(dataCompra) = '$mes' AND YEAR(dataCompra) = '$ano'";
+        $sql = "SELECT COUNT(DISTINCT codigo_venda) as total FROM vendas WHERE MONTH(dataCompra) = '$mes' AND YEAR(dataCompra) = '$ano'";
         $result = mysqli_query($conexao, $sql);
         $row = mysqli_fetch_assoc($result);
         return $row['total'] ?? 0;
@@ -86,10 +86,10 @@ class dashboard {
     public function ultimasVendas($limite = 5) {
         $c = new conectar();
         $conexao = $c->conexao();
-        $sql = "SELECT id_venda, dataCompra, id_cliente, SUM(total_venda) as total 
+        $sql = "SELECT codigo_venda, dataCompra, id_cliente, SUM(total_venda) as total 
                 FROM vendas 
-                GROUP BY id_venda 
-                ORDER BY id_venda DESC 
+                GROUP BY codigo_venda 
+                ORDER BY codigo_venda DESC 
                 LIMIT $limite";
         return mysqli_query($conexao, $sql);
     }

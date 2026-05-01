@@ -48,7 +48,7 @@
         </div>
         <div class="stat-card-info">
             <div class="stat-card-value"><?php echo $baixoEstoque; ?></div>
-            <div class="stat-card-label">Itens c/ Baixo Estoque</div>
+            <div class="stat-card-label">Itens Com Baixo Estoque</div>
         </div>
     </div>
 </div>
@@ -138,7 +138,7 @@
                             while($ver = mysqli_fetch_assoc($ultVendas)):
                         ?>
                         <tr>
-                            <td><span class="badge-modern badge-primary-modern">#<?php echo $ver['id_venda']; ?></span></td>
+                            <td><span class="badge-modern badge-primary-modern">#<?php echo $ver['codigo_venda']; ?></span></td>
                             <td><?php echo date("d/m/Y", strtotime($ver['dataCompra'])); ?></td>
                             <td><?php echo $objV->nomeCliente($ver['id_cliente']); ?></td>
                             <td style="text-align: right;"><strong>R$ <?php echo number_format($ver['total'], 2, ',', '.'); ?></strong></td>

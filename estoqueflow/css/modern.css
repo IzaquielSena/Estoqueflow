@@ -830,7 +830,7 @@ select.form-control-modern {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #1e40af 100%);
+    background: linear-gradient(#212e70, #2c4963);
     padding: 20px;
 }
 
@@ -1070,9 +1070,59 @@ select.form-control-modern {
 /* ============================================
    Responsive Design
    ============================================ */
+
+/* Large screens (desktops > 1200px) */
+@media (min-width: 1201px) {
+    .content-area {
+        padding: 24px 32px;
+    }
+}
+
+/* Medium screens (tablets/small desktops 992px - 1200px) */
+@media (max-width: 1200px) {
+    .sidebar {
+        width: 220px;
+    }
+    .main-content {
+        margin-left: 220px;
+    }
+    .content-area {
+        padding: 20px;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Small screens (tablets 768px - 991px) */
+@media (max-width: 991px) {
+    .sidebar {
+        width: 200px;
+    }
+    .main-content {
+        margin-left: 200px;
+    }
+    .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8 {
+        width: 100%;
+        float: none;
+        padding-left: 15px;
+        padding-right: 15px;
+        margin-bottom: 16px;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .table-modern th, .table-modern td {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Mobile screens (< 768px) */
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
+        width: var(--sidebar-width);
     }
 
     .sidebar.mobile-open {
@@ -1088,11 +1138,97 @@ select.form-control-modern {
     }
 
     .content-area {
-        padding: 16px;
+        padding: 12px;
+    }
+
+    .page-header h1 {
+        font-size: 1.3rem;
+    }
+
+    .page-header p {
+        font-size: 0.8rem;
     }
 
     .stat-card {
         margin-bottom: 12px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-12 {
+        width: 100%;
+        float: none;
+        padding-left: 10px;
+        padding-right: 10px;
+        margin-bottom: 12px;
+    }
+
+    .row {
+        margin-left: -10px;
+        margin-right: -10px;
+    }
+
+    .card-modern .card-body-modern {
+        padding: 14px;
+    }
+
+    .card-modern .card-header-modern {
+        padding: 12px 14px;
+    }
+
+    .card-modern .card-header-modern h3,
+    .card-modern .card-header-modern h4 {
+        font-size: 0.9rem;
+    }
+
+    .table-modern {
+        font-size: 0.78rem;
+    }
+
+    .table-modern th, .table-modern td {
+        padding: 8px 8px;
+        white-space: nowrap;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .btn-modern {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+
+    .btn-sm-modern {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+    }
+
+    .form-control-modern, .form-control {
+        font-size: 0.85rem;
+    }
+
+    .modal-dialog {
+        margin: 10px;
+        width: auto;
+    }
+
+    .modal-dialog.modal-sm {
+        width: auto;
+        max-width: 100%;
+    }
+
+    .topbar {
+        padding: 0 12px;
+        height: 50px;
+    }
+
+    .topbar .page-title {
+        font-size: 0.95rem;
     }
 
     .filter-area .filter-row {
@@ -1101,6 +1237,58 @@ select.form-control-modern {
 
     .filter-area .filter-row .filter-field {
         width: 100%;
+    }
+
+    .input-group {
+        width: 100%;
+    }
+
+    .app-footer {
+        padding: 12px;
+        font-size: 0.7rem;
+    }
+
+    /* Vendas page - stack buttons vertically */
+    div[style*="display:flex"][style*="gap:8px"] {
+        flex-wrap: wrap;
+    }
+}
+
+/* Extra small screens (phones < 480px) */
+@media (max-width: 480px) {
+    .content-area {
+        padding: 8px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 14px;
+    }
+
+    .stat-card .stat-value, .stat-card-value {
+        font-size: 1.2rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.1rem;
+    }
+
+    h1 { font-size: 1.3rem; }
+    h2 { font-size: 1.15rem; }
+    h3 { font-size: 1rem; }
+    h4 { font-size: 0.95rem; }
+
+    .table-modern th, .table-modern td {
+        padding: 6px 6px;
+        font-size: 0.72rem;
+    }
+
+    .sidebar-brand h2 {
+        font-size: 1rem;
     }
 }
 

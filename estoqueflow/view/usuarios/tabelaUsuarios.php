@@ -16,6 +16,7 @@
 			<th>Usuário</th>
 			<th>Email</th>
 			<th style="width:70px;text-align:center;">Editar</th>
+			<th style="width:70px;text-align:center;">Senha</th>
 			<th style="width:70px;text-align:center;">Excluir</th>
 		</tr>
 	</thead>
@@ -28,6 +29,11 @@
 			<td style="text-align:center;">
 				<button data-toggle="modal" data-target="#atualizaUsuarioModal" class="btn-modern btn-warning-modern btn-sm-modern" onclick="adicionarDados('<?php echo $mostrar[0]; ?>')">
 					<span class="glyphicon glyphicon-pencil"></span>
+				</button>
+			</td>
+			<td style="text-align:center;">
+				<button data-toggle="modal" data-target="#redefinirSenhaModal" class="btn-modern btn-primary-modern btn-sm-modern" onclick="prepararRedefinirSenha('<?php echo $mostrar[0]; ?>', '<?php echo $mostrar[1]; ?>')">
+					<span class="glyphicon glyphicon-lock"></span>
 				</button>
 			</td>
 			<td style="text-align:center;">

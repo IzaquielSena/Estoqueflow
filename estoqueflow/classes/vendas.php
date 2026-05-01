@@ -25,15 +25,37 @@ class vendas{
         $rowQtd=mysqli_fetch_assoc($resultQtd);
         $quantidade=$rowQtd['total'];
 
-        // Busca preço atual (última entrada)
-        $sqlPreco="SELECT preco
+        // Busca preco de venda (última entrada)
+        $sqlPreco="SELECT preco_venda
                    from entradas_estoque 
-                   where id_produto='$idproduto'
+                   where id_produto='$idproduto' AND preco_venda > 0
                    ORDER BY data_entrada DESC
                    LIMIT 1";
         $resultPreco=mysqli_query($conexao,$sqlPreco);
         $rowPreco=mysqli_fetch_assoc($resultPreco);
-        $preco=$rowPreco ? $rowPreco['preco'] : 0;
+        $preco_venda = $rowPreco ? $rowPreco['preco_venda'] : 0;
+
+        // Se não tiver preco_venda, busca preco de custo como fallback
+        if($preco_venda == 0){
+            $sqlPrecoCusto="SELECT preco
+                       from entradas_estoque 
+                       where id_produto='$idproduto'
+                       ORDER BY data_entrada DESC
+                       LIMIT 1";
+            $resultPrecoCusto=mysqli_query($conexao,$sqlPrecoCusto);
+            $rowPrecoCusto=mysqli_fetch_assoc($resultPrecoCusto);
+            $preco_venda=$rowPrecoCusto ? $rowPrecoCusto['preco'] : 0;
+        }
+
+        // Busca preco de custo (última entrada)
+        $sqlCusto="SELECT preco
+                   from entradas_estoque 
+                   where id_produto='$idproduto'
+                   ORDER BY data_entrada DESC
+                   LIMIT 1";
+        $resultCusto=mysqli_query($conexao,$sqlCusto);
+        $rowCusto=mysqli_fetch_assoc($resultCusto);
+        $preco_custo=$rowCusto ? $rowCusto['preco'] : 0;
 
         $d=explode('/', $ver[2]);
 
@@ -44,7 +66,8 @@ class vendas{
             'descricao' => $ver[1],
             'quantidade' => $quantidade,
             'url' => $img,
-            'preco' => $preco
+            'preco' => $preco_venda,
+            'preco_custo' => $preco_custo
         );      
         return $dados;
     }
@@ -54,8 +77,13 @@ class vendas{
         $conexao=$c->conexao();
 
         $data=date('Y-m-d');
-        // Obter o ID da venda que será criada (para retorno)
-        $idvenda = null;
+        
+        // Gerar codigo_venda unico para agrupar todos os itens desta venda
+        $sqlCodigo = "SELECT COALESCE(MAX(codigo_venda), 0) + 1 as proximo FROM vendas";
+        $resultCodigo = mysqli_query($conexao, $sqlCodigo);
+        $rowCodigo = mysqli_fetch_assoc($resultCodigo);
+        $codigoVenda = $rowCodigo['proximo'];
+
         $dados=$_SESSION['tabelaComprasTemp'];
         $idusuario=$_SESSION['iduser'];
         $r=0;
@@ -64,41 +92,38 @@ class vendas{
             $d=explode("||", $dados[$i]);
 
             $idproduto = $d[0];
-            $precoUnitario = $d[3];
+            $precoVenda = $d[3];
+            $precoCusto = isset($d[9]) ? $d[9] : 0;
             $quantidade = $d[6];
             
-            // Calcula o total do item garantindo decimais
-            $totalItem = $precoUnitario * $quantidade;
+            $totalItem = $precoVenda * $quantidade;
 
-            // Remover id_venda da inserção - deixar AUTO_INCREMENT gerar
-            $sql="INSERT into vendas (id_cliente,
+            $sql="INSERT into vendas (codigo_venda,
+                                        id_cliente,
                                         id_produto,
                                         id_usuario,
                                         preco,
+                                        preco_custo,
                                         quantidade,
                                         total_venda,
                                         dataCompra)
-                            values ('$d[8]',
+                            values ('$codigoVenda',
+                                    '$d[8]',
                                     '$idproduto',
                                     '$idusuario',
-                                    '$precoUnitario',
+                                    '$precoVenda',
+                                    '$precoCusto',
                                     '$quantidade',
                                     '$totalItem',
                                     '$data')";
             
-            // Executa a inserção da venda
             $result = mysqli_query($conexao, $sql);
 
             if($result){
-                // Capturar o ID da venda gerado automaticamente na primeira inserção
-                if($idvenda === null){
-                    $idvenda = mysqli_insert_id($conexao);
-                }
-                
                 // Cria entrada de estoque negativa para registrar a saída
                 $quantidadeNegativa = -$quantidade;
-                $sqlSaida = "INSERT into entradas_estoque (id_produto, id_usuario, quantidade, preco, data_entrada, dataCaptura)
-                            values ('$idproduto', '$idusuario', '$quantidadeNegativa', '$precoUnitario', '$data', '$data')";
+                $sqlSaida = "INSERT into entradas_estoque (id_produto, id_usuario, quantidade, preco, preco_venda, data_entrada, dataCaptura)
+                            values ('$idproduto', '$idusuario', '$quantidadeNegativa', '$precoCusto', '$precoVenda', '$data', '$data')";
                 
                 if(mysqli_query($conexao, $sqlSaida)){
                     $r++;
@@ -106,29 +131,10 @@ class vendas{
             }
         }
 
-        // Limpa o carrinho após finalizar para evitar reenvío de dados
+        // Limpa o carrinho após finalizar
         unset($_SESSION['tabelaComprasTemp']);
 
-        return $r;
-    }
-
-    // DEPRECATED: Esta funcao nao eh mais necessaria apos implementar AUTO_INCREMENT
-    // Mantida por compatibilidade com codigo legado
-    public function criarComprovante(){
-        $c= new conectar();
-        $conexao=$c->conexao();
-
-        $sql="SELECT MAX(id_venda) as max_id from vendas";
-
-        $resul=mysqli_query($conexao,$sql);
-        $row=mysqli_fetch_assoc($resul);
-        $id=$row['max_id'];
-
-        if($id=="" or $id==null or $id==0){
-            return 1;
-        }else{
-            return $id + 1;
-        }
+        return $codigoVenda;
     }
 
     public function nomeCliente($idCliente){
@@ -152,13 +158,13 @@ class vendas{
         }
     }
 
-    public function obterTotal($idvenda){
+    public function obterTotal($codigoVenda){
         $c= new conectar();
         $conexao=$c->conexao();
 
         $sql="SELECT total_venda 
                 from vendas 
-                where id_venda='$idvenda'";
+                where codigo_venda='$codigoVenda'";
         $result=mysqli_query($conexao,$sql);
 
         $total=0;
@@ -168,28 +174,45 @@ class vendas{
         return $total;
     }
 
-    // No arquivo classes/vendas.php
-public function obterTodasVendasGeral(){
-    $c = new conectar();
-    $conexao = $c->conexao();
+    public function obterLucro($codigoVenda){
+        $c= new conectar();
+        $conexao=$c->conexao();
 
-    // Seleciona todas as vendas agrupadas por ID para não repetir itens da mesma venda
-    $sql = "SELECT id_venda, dataCompra, id_cliente 
-            FROM vendas 
-            GROUP BY id_venda 
-            ORDER BY dataCompra DESC";
-    $result = mysqli_query($conexao, $sql);
+        $sql="SELECT preco, preco_custo, quantidade 
+                from vendas 
+                where codigo_venda='$codigoVenda'";
+        $result=mysqli_query($conexao,$sql);
 
-    return $result;
-}
+        $lucro=0;
+        while($ver=mysqli_fetch_row($result)){
+            $precoVenda = $ver[0];
+            $precoCusto = $ver[1] ? $ver[1] : 0;
+            $quantidade = $ver[2];
+            $lucro += ($precoVenda - $precoCusto) * $quantidade;
+        }
+        return $lucro;
+    }
+
+    public function obterTodasVendasGeral(){
+        $c = new conectar();
+        $conexao = $c->conexao();
+
+        $sql = "SELECT codigo_venda, dataCompra, id_cliente 
+                FROM vendas 
+                GROUP BY codigo_venda 
+                ORDER BY codigo_venda DESC";
+        $result = mysqli_query($conexao, $sql);
+
+        return $result;
+    }
 
     public function relatorioVendasPorData($dataInicio, $dataFim){
         $c = new conectar();
         $conexao = $c->conexao();
-        $sql = "SELECT id_venda, dataCompra, id_cliente 
+        $sql = "SELECT codigo_venda, dataCompra, id_cliente 
                 FROM vendas 
                 WHERE dataCompra BETWEEN '$dataInicio' AND '$dataFim' 
-                GROUP BY id_venda";
+                GROUP BY codigo_venda";
         return mysqli_query($conexao, $sql);
     }
 }
